@@ -1,0 +1,23 @@
+{
+    "name": "marcusvbda/uploader",
+    "description": "",
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "Marcus Vinicius Bassalobre de Assis",
+            "email": "vinicius.bda@icloud.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "cviebrock/eloquent-sluggable": "^4.6"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations"
+        ],
+        "psr-4": {
+            "marcusvbda\\uploader\\": "src/"
+        }
+    }
+}
