@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Storage;
 use marcusvbda\uploader\Requests\UploadFile;
 use Cviebrock\EloquentSluggable\Services\SlugService;
 
-use App\Teste;
-
 class UploaderController extends Controller
 {
 
@@ -30,27 +28,13 @@ class UploaderController extends Controller
         }
     }
 
-    public function teste2()
-    {
-        $teste = Teste::first();
-        $teste->removeFile(1);
-        dd($teste);
-    }
-
-    public function testeUpload(Request $request)
-    {
-        $data = $request->all();
-        $result = UploaderController::upload($data["_file"],$data["name"]);
-        dd($result);
-    }
-
     public static function upload($file,$filename)
     {
         try 
         {
             $path = config('uploader.upload_path');
             $extension = $file->getClientOriginalExtension();
-            $slugname = SlugService::createSlug(File::class, 'slug', $filename);
+            $slugname = SlugService::createSlug(_Files::class, 'slug', $filename);
             $url = $file->storeAs($path, $slugname.".".$extension);
             $newFile = [
                 "name"       =>    $filename,

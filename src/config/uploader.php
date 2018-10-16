@@ -1,5 +1,6 @@
 <?php
 
 return [
-    'upload_path' => env('UPLOAD_PATH', ''),
+    'upload_path' => 'uploads',
+    'cascadeFile' => true,
 ];

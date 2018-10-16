@@ -1,7 +1,7 @@
 {
     "name": "marcusvbda/uploader",
+    "license":"MIT",
     "description": "",
-    "license": "GPL",
     "authors": [
         {
             "name": "Marcus Vinicius Bassalobre de Assis",
