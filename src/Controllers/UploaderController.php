@@ -27,9 +27,7 @@ class UploaderController extends Controller
         }
     }
 
-
-
-    public static function upload($file,$filename)
+    public static function upload($file,$filename,$description)
     {
         try 
         {
@@ -40,6 +38,7 @@ class UploaderController extends Controller
             $newFile = [
                 "name"       =>    $filename,
                 "dir"        =>    $dir,
+                "description"=>    $description,
                 "filename"   =>    $slugname,
                 "extension"  =>    $extension,
                 "size"       =>    $file->getClientSize(),

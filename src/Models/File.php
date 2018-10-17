@@ -16,23 +16,24 @@ class File extends Model
 {
 	use SoftDeletes,Sluggable,SluggableScopeHelpers;
 	
-    protected $table = '_files';
+	protected $table = '_files';
+	protected $appends = ['url'];
+
 	protected $fillable = [
 		'id',
 		'name',
 		'dir',
+		'description',
 		'extension',
 		'size',
 		'type',
 		'slug',
 	];
 	
-	public function url()
-	{
-		return route('uploader.files.get',[
-            "slug" => $this->slugname,
-            "extension" => $this-extension
-    	]);
+	public function getUrlAttribute()
+    {
+        $url = config('uploader.image_server').$this->slug.".".$this->extension;
+		return $this->attributes['url'] = $url;
 	}
     
     public function sluggable(){
