@@ -18,4 +18,9 @@ class FileCategory extends Model
             'id',
             'name'
     ];
+
+    public function files()
+	{
+		return $this->belongsToMany(_File::class, '_files_categories_relashion','_files_category_id','file_id');
+	}
 }

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Cviebrock\EloquentSluggable\{Sluggable,SluggableScopeHelpers};
 use marcusvbda\uploader\Models\FileRelashions;
 use Illuminate\Support\Facades\Storage;
-
+use marcusvbda\uploader\Models\{FileCategory};
 
 
 class File extends Model
@@ -18,6 +18,7 @@ class File extends Model
 	
     protected $table = '_files';
 	protected $fillable = [
+		'id',
 		'name',
 		'url',
 		'extension',
@@ -34,6 +35,11 @@ class File extends Model
 				'source' => 'name'
 			]
 		];
+	}
+
+	public function categories()
+	{
+		return $this->belongsToMany(FileCategory::class, '_files_categories_relashion','file_id','_files_category_id');
 	}
 
 	public function delete()

@@ -70,6 +70,8 @@ class Files extends Migration
     public function down()
     {
         Schema::drop('_files');
+        Schema::drop('_files_categories');
+        Schema::drop('_files_categories_relashion');
         Schema::drop('_files_relashion');
     }
 }

@@ -1,6 +1,5 @@
 <?php
 
 return [
-    'upload_path' => 'uploads',
-    'cascadeFile' => true,
+    'upload_path' => 'uploads'
 ];
