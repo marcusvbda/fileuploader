@@ -27,6 +27,8 @@ class UploaderController extends Controller
         }
     }
 
+
+
     public static function upload($file,$filename)
     {
         try 
@@ -35,12 +37,8 @@ class UploaderController extends Controller
             $extension = $file->getClientOriginalExtension();
             $slugname = SlugService::createSlug(_Files::class, 'slug', $filename);
             $dir = $file->storeAs($path, $slugname.".".$extension);
-            $url = route('uploader.files.get',[
-                 "slug" => $slugname.".".$extension
-            ]);
             $newFile = [
                 "name"       =>    $filename,
-                "url"        =>    $url,
                 "dir"        =>    $dir,
                 "filename"   =>    $slugname,
                 "extension"  =>    $extension,

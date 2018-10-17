@@ -20,13 +20,20 @@ class File extends Model
 	protected $fillable = [
 		'id',
 		'name',
-		'url',
 		'dir',
 		'extension',
 		'size',
 		'type',
 		'slug',
-    ];
+	];
+	
+	public function url()
+	{
+		return route('uploader.files.get',[
+            "slug" => $this->slugname,
+            "extension" => $this-extension
+    	]);
+	}
     
     public function sluggable(){
 		return
