@@ -56,14 +56,14 @@ class File extends Model
 		if(config('uploader.cascadeFile'))
 		{
 			FileRelashions::where("file_id",$this->id)->delete();
-			Storage::delete($this->url);
+			Storage::delete($this->dir);
 			return parent::delete();
 		}
 		else
 		{
 			if( FileRelashions::where("file_id",$this->id)->count()==0  )
 			{
-				Storage::delete($this->url);
+				Storage::delete($this->dir);
 				return parent::delete();	
 			}
 		}

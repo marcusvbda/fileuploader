@@ -29,7 +29,6 @@ class Files extends Migration
             $table->string('dir');
             $table->string('extension');
             $table->string('type');
-            $table->string('size');
             $table->softDeletes();
             $table->timestamps();
         });

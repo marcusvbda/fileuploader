@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use marcusvbda\uploader\Requests\UploadFile;
 use Cviebrock\EloquentSluggable\Services\SlugService;
 
+
 class UploaderController extends Controller
 {
 
@@ -32,22 +33,41 @@ class UploaderController extends Controller
         try 
         {
             $path = config('uploader.upload_path');
-            $extension = $file->getClientOriginalExtension();
-            $slugname = SlugService::createSlug(_Files::class, 'slug', $filename);
-            $dir = $file->storeAs($path, $slugname.".".$extension);
+            if(is_string($file))
+            {
+                $url = $file;
+                $extension = pathinfo($url, PATHINFO_EXTENSION); 
+                $filename  = pathinfo($url, PATHINFO_FILENAME);
+                $filename  = pathinfo($url, PATHINFO_FILENAME);
+                $type  = pathinfo($url, FILEINFO_MIME_TYPE);
+                $slugname = SlugService::createSlug(_Files::class, 'slug', $filename);
+                $data = file_get_contents($url);
+                $dir = $path."/".$slugname.".".$extension;
+                $buffer = file_get_contents($url);
+                $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                $type = $finfo->buffer($buffer);
+                Storage::put($dir, $data);
+            }
+            else
+            {
+                $extension = $file->getClientOriginalExtension();
+                $slugname = SlugService::createSlug(_Files::class, 'slug', $filename);
+                $dir = $file->storeAs($path, $slugname.".".$extension);
+                $type = substr($file->getMimeType(), 0, 5);
+            }
             $newFile = [
                 "name"       =>    $filename,
                 "dir"        =>    $dir,
                 "description"=>    $description,
-                "filename"   =>    $slugname,
+                "slug"   =>    $slugname,
                 "extension"  =>    $extension,
-                "size"       =>    $file->getClientSize(),
-                "type"       =>    substr($file->getMimeType(), 0, 5)
+                "type"       =>    $type
             ];
             return _Files::create($newFile);
         }
         catch(\Exception $e)
         {
+            Storage::delete($dir);
             return null;
         }
     }
