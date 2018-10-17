@@ -15,12 +15,11 @@ class UploaderController extends Controller
 
     public function getFile($slug)
     {
-
         if ($file = _Files::findBySlug($slug)) 
         {
-            if (Storage::disk('local')->has($file->url)) 
+            if (Storage::disk('local')->has($file->dir)) 
             {
-                $path = storage_path('app/'.$file->url);
+                $path = storage_path('app/'.$file->dir);
                 $response = response()->make(File::get(  $path  ));
                 $response->header('content-type', File::mimeType($path));
                 return $response;
@@ -35,10 +34,14 @@ class UploaderController extends Controller
             $path = config('uploader.upload_path');
             $extension = $file->getClientOriginalExtension();
             $slugname = SlugService::createSlug(_Files::class, 'slug', $filename);
-            $url = $file->storeAs($path, $slugname.".".$extension);
+            $dir = $file->storeAs($path, $slugname.".".$extension);
+            $url = route('uploader.files.get',[
+                 "slug" => $slugname = SlugService::createSlug(_Files::class, 'slug', $filename)
+            ]);
             $newFile = [
                 "name"       =>    $filename,
                 "url"        =>    $url,
+                "dir"        =>    $dir,
                 "filename"   =>    $slugname,
                 "extension"  =>    $extension,
                 "size"       =>    $file->getClientSize(),

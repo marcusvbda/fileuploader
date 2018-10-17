@@ -26,6 +26,7 @@ class Files extends Migration
             $table->string('name');
             $table->string('slug');
             $table->string('url');
+            $table->string('dir');
             $table->string('extension');
             $table->string('type');
             $table->string('size');

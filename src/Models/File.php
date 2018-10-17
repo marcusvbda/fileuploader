@@ -21,6 +21,7 @@ class File extends Model
 		'id',
 		'name',
 		'url',
+		'dir',
 		'extension',
 		'size',
 		'type',
