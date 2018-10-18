@@ -4,13 +4,12 @@ namespace marcusvbda\uploader\Models;
 use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use marcusvbda\uploader\Models\File as _File;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use marcusvbda\uploader\Traits\HasFileRelashion;
+use marcusvbda\uploader\Traits\HasFileRelation;
 
 
 class FileCategory extends Model
 {
-    use SoftDeletes, HasFileRelashion;
+    use  HasFileRelation;
     
         
     protected $table = '_files_categories';
@@ -21,6 +20,6 @@ class FileCategory extends Model
 
     public function files()
 	{
-		return $this->belongsToMany(_File::class, '_files_categories_relashion','_files_category_id','file_id');
+		return $this->belongsToMany(_File::class, '_files_categories_relation','_files_category_id','file_id');
 	}
 }

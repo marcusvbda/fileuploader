@@ -4,13 +4,11 @@ namespace marcusvbda\uploader\Models;
 use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use marcusvbda\uploader\Models\File as _File;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class FileRelashions extends Model
+class FileRelation extends Model
 {
-    use SoftDeletes;
         
-    protected $table = '_files_relashion';
+    protected $table = '_files_relation';
     protected $fillable = [
             'file_model',
             'ref_id',
