@@ -29,6 +29,20 @@ class UploaderController extends Controller
         }
     }
 
+    public function getThumbFile($slug)
+    {
+        if ($file = _Files::findBySlug($slug)) 
+        {
+            if (Storage::disk('local')->has($dir = config('uploader.thumbnail_path')."/".$file->id.".".$file->extension)) 
+            {
+                $path = storage_path('app/'.$dir);
+                $response = response()->make(File::get(  $path  ));
+                $response->header('content-type', File::mimeType($path));
+                return $response;
+            }
+        }
+    }
+
 
     public static function makeThumbnail($fileId)
     {

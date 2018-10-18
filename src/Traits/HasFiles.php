@@ -4,7 +4,7 @@ use marcusvbda\uploader\Models\File as _Files;
 use Illuminate\Support\Facades\Storage;
 use marcusvbda\uploader\Requests\UploadFile;
 use Cviebrock\EloquentSluggable\Services\SlugService;
-use  marcusvbda\uploader\Models\FileRelashions;
+use  marcusvbda\uploader\Models\FileRelation;
 
 
 trait HasFiles
@@ -12,8 +12,8 @@ trait HasFiles
 	public function addFile($file_id)
 	{
         $model = $this->getMorphClass();
-        $ordination = FileRelashions::where("ref_id",$this->id)->max('ordination')+1;
-        return FileRelashions::create([
+        $ordination = FileRelation::where("ref_id",$this->id)->max('ordination')+1;
+        return FileRelation::create([
             'file_model' => $model,
             'ref_id'     => $this->id,
             'file_id'    => $file_id,
@@ -23,12 +23,12 @@ trait HasFiles
     
     public function files()
     {
-        return FileRelashions::where("ref_id",$this->id)->orderBy("ordination");
+        return FileRelation::where("ref_id",$this->id)->orderBy("ordination");
     }
 
     public function removeFile($file_id)
     {
-        return FileRelashions::where("ref_id",$this->id)->delete();
+        return FileRelation::where("ref_id",$this->id)->delete();
     }
 
 }
