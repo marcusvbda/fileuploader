@@ -14,6 +14,7 @@ class Files extends Migration
             $table->collation = 'utf8_unicode_ci';
             $table->increments('id');
             $table->string('name');
+            $table->softDeletes();
             $table->timestamps();
         });
 
@@ -28,10 +29,11 @@ class Files extends Migration
             $table->string('dir');
             $table->string('extension');
             $table->string('type');
+            $table->softDeletes();
             $table->timestamps();
         });
 
-        Schema::create('_files_categories_relation', function (Blueprint $table) 
+        Schema::create('_files_categories_relashion', function (Blueprint $table) 
         {
             $table->charset = 'utf8';
             $table->collation = 'utf8_unicode_ci';
@@ -45,16 +47,14 @@ class Files extends Migration
                 ->references('id')
                 ->on('_files')
                 ->onDelete('cascade'); 
-            
-            $table->primary(['_files_category_id','file_id']);    
+            $table->softDeletes();
             $table->timestamps();
         });
 
-        Schema::create('_files_relation', function (Blueprint $table) 
+        Schema::create('_files_relashion', function (Blueprint $table) 
         {
             $table->charset = 'utf8';
             $table->collation = 'utf8_unicode_ci';
-            $table->increments('id');
             $table->string('file_model');
             $table->integer('ref_id');
             $table->integer('ordination')->default(0);
@@ -63,6 +63,7 @@ class Files extends Migration
                 ->references('id')
                 ->on('_files')
                 ->onDelete('cascade'); 
+            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -70,7 +71,7 @@ class Files extends Migration
     {
         Schema::drop('_files');
         Schema::drop('_files_categories');
-        Schema::drop('_files_categories_relation');
-        Schema::drop('_files_relation');
+        Schema::drop('_files_categories_relashion');
+        Schema::drop('_files_relashion');
     }
 }

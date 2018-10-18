@@ -6,7 +6,7 @@ use Eloquent;
 
 use Illuminate\Database\Eloquent\Model;
 use Cviebrock\EloquentSluggable\{Sluggable,SluggableScopeHelpers};
-use marcusvbda\uploader\Models\FileRelations;
+use marcusvbda\uploader\Models\FileRelashions;
 use Illuminate\Support\Facades\Storage;
 use marcusvbda\uploader\Models\{FileCategory};
 
@@ -31,8 +31,7 @@ class File extends Model
 
 	public function getThumbnailAttribute()
     {
-		$url = config('uploader.image_server')."thumbnail/".$this->slug.".".$this->extension;
-		return $this->attributes['thumbnail'] = $url;
+		
 	}
 	
 	public function getUrlAttribute()
@@ -53,21 +52,20 @@ class File extends Model
 
 	public function categories()
 	{
-		return $this->belongsToMany(FileCategory::class, '_files_categories_relation','file_id','_files_category_id');
+		return $this->belongsToMany(FileCategory::class, '_files_categories_relashion','file_id','_files_category_id');
 	}
-
 
 	public function delete()
 	{
 		if(config('uploader.cascadeFile'))
 		{
-			Filerelastions::where("file_id",$this->id)->delete();
+			FileRelashions::where("file_id",$this->id)->delete();
 			Storage::delete($this->dir);
 			return parent::delete();
 		}
 		else
 		{
-			if( Filerelastions::where("file_id",$this->id)->count()==0  )
+			if( FileRelashions::where("file_id",$this->id)->count()==0  )
 			{
 				Storage::delete($this->dir);
 				return parent::delete();	

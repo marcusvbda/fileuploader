@@ -5,9 +5,9 @@ use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use marcusvbda\uploader\Models\File as _File;
 
-class FileRelation extends Model
-{
-    protected $table = '_files_relation';
+class FileRelashions extends Model
+{       
+    protected $table = '_files_relashion';
     protected $fillable = [
             'file_model',
             'ref_id',

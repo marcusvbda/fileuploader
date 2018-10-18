@@ -5,7 +5,7 @@ use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use File;
-use marcusvbda\uploader\Models\File as _File;
+use marcusvbda\uploader\Models\File as _Files;
 use Illuminate\Support\Facades\Storage;
 use marcusvbda\uploader\Requests\UploadFile;
 use Cviebrock\EloquentSluggable\Services\SlugService;
@@ -17,7 +17,7 @@ class UploaderController extends Controller
 
     public function getFile($slug)
     {
-        if ($file = _File::findBySlug($slug)) 
+        if ($file = _Files::findBySlug($slug)) 
         {
             if (Storage::disk('local')->has($file->dir)) 
             {
@@ -29,37 +29,12 @@ class UploaderController extends Controller
         }
     }
 
-    public function getThumbnail($slug)
-    {
-        if ($file = _File::findBySlug($slug)) 
-        {
-            $thumbnailDir = config('uploader.thumbnail_path')."/".$file->id.".".$file->extension;
-            if (Storage::disk('local')->has($thumbnailDir)) 
-            {
-                $path = storage_path('app/'.$thumbnailDir);
-                $response = response()->make(File::get(  $path  ));
-                $response->header('content-type', File::mimeType($path));
-                return $response;
-            }
-        }
-    }
 
-    public static function edit(_File $file,$array)
+    public static function makeThumbnail($fileId)
     {
-        if (isset($array["name"])) {
-            $array["slug"] = SlugService::createSlug(_File::class, 'slug', $array["name"]);
-            $array["dir"] = str_replace($file->slug, $array["slug"], $file->dir);
-            Storage::move($file->dir, config('uploader.upload_path')."/". $array["slug"].".".$file->extension );
-        }
-        $file = $file->update($array);
-        return $file;
-    }
-
-
-    public static function makeThumbnail(_File $file)
-    {
+        $file = _Files::find($fileId);
         $path = storage_path("app/".$file->dir);
-        $thumbnailDir = config('uploader.thumbnail_path')."/".$file->id.".".$file->extension;
+        $thumbnailDir = config('uploader.thumbnail_path')."/".$file->id."_thumb.".$file->extension;
         $thumb = Image::make( $path );
         $thumb = $thumb->resize(null,(int)config('uploader.thumbnail_height'), function ($constraint) 
         {
@@ -83,7 +58,7 @@ class UploaderController extends Controller
                 $filename  = pathinfo($url, PATHINFO_FILENAME);
                 $filename  = pathinfo($url, PATHINFO_FILENAME);
                 $type  = pathinfo($url, FILEINFO_MIME_TYPE);
-                $slugname = SlugService::createSlug(_File::class, 'slug', $name);
+                $slugname = SlugService::createSlug(_Files::class, 'slug', $name);
                 $data = file_get_contents($url);
                 $dir = $path."/".$slugname.".".$extension;
                 $buffer = file_get_contents($url);
@@ -94,7 +69,7 @@ class UploaderController extends Controller
             else
             {
                 $extension = $file->getClientOriginalExtension();
-                $slugname = SlugService::createSlug(_File::class, 'slug', $name);
+                $slugname = SlugService::createSlug(_Files::class, 'slug', $name);
                 $dir = $file->storeAs($path, $slugname.".".$extension);
                 $type = substr($file->getMimeType(), 0, 5);
             }
@@ -107,7 +82,7 @@ class UploaderController extends Controller
                 "extension"  =>    $extension,
                 "type"       =>    $type
             ];
-            return _File::create($newFile);
+            return _Files::create($newFile);
         }
         catch(\Exception $e)
         {
