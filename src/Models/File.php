@@ -17,7 +17,7 @@ class File extends Model
 	use SoftDeletes,Sluggable,SluggableScopeHelpers;
 	
 	protected $table = '_files';
-	protected $appends = ['url'];
+	protected $appends = ['url','thumbnail'];
 
 	protected $fillable = [
 		'id',
@@ -29,6 +29,11 @@ class File extends Model
 		'type',
 		'slug',
 	];
+
+	public function getThumbnailAttribute()
+    {
+		
+	}
 	
 	public function getUrlAttribute()
     {

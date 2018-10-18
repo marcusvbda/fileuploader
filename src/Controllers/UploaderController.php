@@ -9,7 +9,8 @@ use marcusvbda\uploader\Models\File as _Files;
 use Illuminate\Support\Facades\Storage;
 use marcusvbda\uploader\Requests\UploadFile;
 use Cviebrock\EloquentSluggable\Services\SlugService;
-
+use Intervention\Image\Facades\Image as Image;
+use WebP;
 
 class UploaderController extends Controller
 {
@@ -28,7 +29,24 @@ class UploaderController extends Controller
         }
     }
 
-    public static function upload($file,$filename,$description)
+
+    public static function makeThumbnail($fileId)
+    {
+        $file = _Files::find($fileId);
+        $path = storage_path("app/".$file->dir);
+        $thumbnailDir = config('uploader.thumbnail_path')."/".$file->id."_thumb.".$file->extension;
+        $thumb = Image::make( $path );
+        $thumb = $thumb->resize(null,(int)config('uploader.thumbnail_height'), function ($constraint) 
+        {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        })->encode($file->extension, 10);
+        $thumbnail =  Storage::put($thumbnailDir, $thumb);
+        
+        return $thumbnail;
+    }
+
+    public static function upload($file,$name,$description)
     {
         try 
         {
@@ -40,7 +58,7 @@ class UploaderController extends Controller
                 $filename  = pathinfo($url, PATHINFO_FILENAME);
                 $filename  = pathinfo($url, PATHINFO_FILENAME);
                 $type  = pathinfo($url, FILEINFO_MIME_TYPE);
-                $slugname = SlugService::createSlug(_Files::class, 'slug', $filename);
+                $slugname = SlugService::createSlug(_Files::class, 'slug', $name);
                 $data = file_get_contents($url);
                 $dir = $path."/".$slugname.".".$extension;
                 $buffer = file_get_contents($url);
@@ -51,12 +69,13 @@ class UploaderController extends Controller
             else
             {
                 $extension = $file->getClientOriginalExtension();
-                $slugname = SlugService::createSlug(_Files::class, 'slug', $filename);
+                $slugname = SlugService::createSlug(_Files::class, 'slug', $name);
                 $dir = $file->storeAs($path, $slugname.".".$extension);
                 $type = substr($file->getMimeType(), 0, 5);
             }
+            $type = explode("/",$type)[0];
             $newFile = [
-                "name"       =>    $filename,
+                "name"       =>    $name,
                 "dir"        =>    $dir,
                 "description"=>    $description,
                 "slug"   =>    $slugname,
