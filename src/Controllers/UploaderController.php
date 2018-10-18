@@ -33,7 +33,8 @@ class UploaderController extends Controller
     {
         if ($file = _Files::findBySlug($slug)) 
         {
-            if (Storage::disk('local')->has($dir = config('uploader.thumbnail_path')."/".$file->id.".".$file->extension)) 
+            $dir = config('uploader.thumbnail_path')."/".$file->id.".".$file->extension;
+            if (Storage::disk('local')->has($dir)) 
             {
                 $path = storage_path('app/'.$dir);
                 $response = response()->make(File::get(  $path  ));
@@ -44,11 +45,10 @@ class UploaderController extends Controller
     }
 
 
-    public static function makeThumbnail($fileId)
+    public static function makeThumbnail($file)
     {
-        $file = _Files::find($fileId);
         $path = storage_path("app/".$file->dir);
-        $thumbnailDir = config('uploader.thumbnail_path')."/".$file->id."_thumb.".$file->extension;
+        $thumbnailDir = config('uploader.thumbnail_path')."/".$file->id.".".$file->extension;
         $thumb = Image::make( $path );
         $thumb = $thumb->resize(null,(int)config('uploader.thumbnail_height'), function ($constraint) 
         {

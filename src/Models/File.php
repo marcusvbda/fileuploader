@@ -53,7 +53,7 @@ class File extends Model
 
 	public function categories()
 	{
-		return $this->belongsToMany(FileCategory::class, '_files_categories_Relation','file_id','_files_category_id');
+		return $this->belongsToMany(FileCategory::class, '_files_categories_relation','file_id','_files_category_id');
 	}
 
 	public function delete()
