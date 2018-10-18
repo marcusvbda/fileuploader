@@ -54,7 +54,7 @@ class UploaderController extends Controller
         {
             $constraint->aspectRatio();
             $constraint->upsize();
-        })->encode($file->extension, 10);
+        })->encode($file->extension, config('uploader.thumbnail_quality'));
         $thumbnail =  Storage::put($thumbnailDir, $thumb);
         
         return $thumbnail;
