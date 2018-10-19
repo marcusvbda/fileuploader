@@ -41,6 +41,15 @@ class UploaderController extends Controller
                 $response->header('content-type', File::mimeType($path));
                 return $response;
             }
+            else
+            {
+                if (file_exists($path = dirname(__FILE__)."/../images/".$file->type.".png")) 
+                {
+                    $response = response()->make(File::get($path));
+                    $response->header('content-type', File::mimeType($path));
+                    return $response;
+                }
+            }
         }
     }
 
