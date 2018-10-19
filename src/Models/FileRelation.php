@@ -20,10 +20,4 @@ class FileRelation extends Model
         return $this->belongsTo(_File::class);
     }
         
-    public function reorder($rows)
-    {
-        foreach ($rows as $row) {
-            $this::where("ref_id", $this->ref_id)->where("file_id", $row["file_id"])->update($row);
-        }
-    }
 }
