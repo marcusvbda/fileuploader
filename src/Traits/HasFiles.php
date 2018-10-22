@@ -12,10 +12,10 @@ trait HasFiles
 	public function addFile(_File $file)
 	{
         $model = $this->getMorphClass();
-        $ordination = FileRelation::where("ref_id",$this->id)->where("file_model",$model)->max('ordination')+1;
+        $ordination = FileRelation::where("taggable_id",$this->id)->where("taggable_type",$model)->max('ordination')+1;
         return FileRelation::create([
-            'file_model' => $model,
-            'ref_id'     => $this->id,
+            'taggable_type' => $model,
+            'taggable_id'   => $this->id,
             'file_id'    => $file->id,
             'ordination' => $ordination
         ]);
@@ -24,13 +24,13 @@ trait HasFiles
     public function files()
     {
         $model = $this->getMorphClass();
-        return FileRelation::where("ref_id",$this->id)->where("file_model",$model)->orderBy("ordination");
+        return FileRelation::where("taggable_id",$this->id)->where("taggable_type",$model)->orderBy("ordination");
     }
 
     public function removeFile(_File $file)
     {
         $model = $this->getMorphClass();
-        return FileRelation::where("ref_id",$this->id)->where("file_model",$model)->where("file_id",$file->id)->delete();
+        return FileRelation::where("taggable_id",$this->id)->where("taggable_type",$model)->where("file_id",$file->id)->delete();
     }
 
     public function reorderFiles($rows)
@@ -38,7 +38,7 @@ trait HasFiles
         $model = $this->getMorphClass();
         foreach ($rows as $row) 
         {
-            FileRelation::where("ref_id", $this->id)->where("file_model",$model)->where("file_id", $row["file_id"])->update($row);
+            FileRelation::where("taggable_id", $this->id)->where("taggable_type",$model)->where("file_id", $row["file_id"])->update($row);
         }
     }
 

@@ -55,8 +55,7 @@ class Files extends Migration
             $table->charset = 'utf8';
             $table->collation = 'utf8_unicode_ci';
             $table->increments('id');
-            $table->string('file_model');
-            $table->integer('ref_id');
+            $table->morphs("taggable");
             $table->integer('ordination')->default(0);
             $table->unsignedInteger('file_id');
             $table->foreign('file_id')
