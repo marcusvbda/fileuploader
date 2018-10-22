@@ -9,8 +9,8 @@ class FileRelation extends Model
 {
     protected $table = '_files_relation';
     protected $fillable = [
-            'taggagle_type',
-            'taggable_id',
+            'model_type',
+            'model_id',
             'file_id',
             'ordination'
     ];

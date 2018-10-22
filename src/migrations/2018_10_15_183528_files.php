@@ -35,8 +35,8 @@ class Files extends Migration
         {
             $table->charset = 'utf8';
             $table->collation = 'utf8_unicode_ci';
-            $table->unsignedInteger('_files_category_id');
-            $table->foreign('_files_category_id')
+            $table->unsignedInteger('file_category_id');
+            $table->foreign('file_category_id')
                 ->references('id')
                 ->on('_files_categories')
                 ->onDelete('cascade'); 
@@ -46,7 +46,7 @@ class Files extends Migration
                 ->on('_files')
                 ->onDelete('cascade'); 
             
-            $table->primary(['_files_category_id','file_id']);    
+            $table->primary(['file_category_id','file_id']);    
             $table->timestamps();
         });
 
@@ -55,7 +55,7 @@ class Files extends Migration
             $table->charset = 'utf8';
             $table->collation = 'utf8_unicode_ci';
             $table->increments('id');
-            $table->morphs("taggable");
+            $table->morphs("model");
             $table->integer('ordination')->default(0);
             $table->unsignedInteger('file_id');
             $table->foreign('file_id')
@@ -63,6 +63,20 @@ class Files extends Migration
                 ->on('_files')
                 ->onDelete('cascade'); 
             $table->timestamps();
+        });
+
+        Schema::create('_acl_category', function (Blueprint $table) 
+        {
+            $table->charset = 'utf8';
+            $table->collation = 'utf8_unicode_ci';
+            $table->morphs("user");
+            $table->unsignedInteger('file_category_id');
+            $table->foreign('file_category_id')
+                ->references('id')
+                ->on('_files_categories')
+                ->onDelete('cascade'); 
+            $table->timestamps();
+            $table->primary(['user_id', 'user_type','file_category_id']);
         });
     }
     public function down()

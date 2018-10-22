@@ -12,14 +12,14 @@ trait HasFileRelation
 	public function addFile(_File $file)
 	{
         return FileCategoryRelation::create([
-            '_files_category_id' => $this->id,
+            'file_category_id'   => $this->id,
             'file_id'            => $file->id
         ]);
     }
     
     public function files()
     {
-        return FileCategoryRelation::where("_files_category_id",$this->id);
+        return FileCategoryRelation::where("file_category_id",$this->id);
     }
 
 }

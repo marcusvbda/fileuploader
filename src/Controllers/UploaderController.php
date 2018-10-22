@@ -10,11 +10,11 @@ use Illuminate\Support\Facades\Storage;
 use marcusvbda\uploader\Requests\UploadFile;
 use Cviebrock\EloquentSluggable\Services\SlugService;
 use Intervention\Image\Facades\Image as Image;
-use WebP;
+use marcusvbda\uploader\Models\{FileCategory,AclCategory};
+use Auth;
 
 class UploaderController extends Controller
 {
-
     public function getFile($slug)
     {
         if ($file = _Files::findBySlug($slug)) 

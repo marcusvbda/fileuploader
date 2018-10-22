@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Cviebrock\EloquentSluggable\{Sluggable,SluggableScopeHelpers};
 use marcusvbda\uploader\Models\FileRelation;
 use Illuminate\Support\Facades\Storage;
-use marcusvbda\uploader\Models\{FileCategory};
-
+use marcusvbda\uploader\Models\{FileCategory,AclCategory,FileCategoryRelation};
+use Auth;
 
 class File extends Model
 {
@@ -28,6 +28,14 @@ class File extends Model
 		'type',
 		'slug',
 	];
+
+	public function scopeAcl($query)
+    {
+		$can_categories = AclCategory::where("user_id",Auth::user()->id)->pluck("file_category_id")->ToArray();
+		$can_files = FileCategoryRelation::whereIn("file_category_id",$can_categories)->pluck("file_id")->ToArray();
+		$no_category = $this::whereNotIn("id", FileCategoryRelation::pluck("file_id")->ToArray()  )->pluck("id")->ToArray();
+		return $query->whereIn("id",$can_files)->orWhereIn("id",$no_category);
+	}
 
 	public function getThumbnailAttribute()
     {
@@ -53,7 +61,7 @@ class File extends Model
 
 	public function categories()
 	{
-		return $this->belongsToMany(FileCategory::class, '_files_categories_relation','file_id','_files_category_id');
+		return $this->belongsToMany(FileCategory::class, '_files_categories_relation','file_id','file_category_id');
 	}
 
 	public function delete()

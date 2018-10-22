@@ -9,7 +9,7 @@ class FileCategoryRelation extends Model
         
     protected $table = '_files_categories_relation';
     protected $fillable = [
-            '_files_category_id',
+            'file_category_id',
             'file_id'
     ];
 
