@@ -27,14 +27,30 @@ class File extends Model
 		'size',
 		'type',
 		'slug',
+		'user_type',
+		'user_id',
+		'private'
 	];
 
-	public function scopeAcl($query)
+	public function scopeVisible($query)
     {
-		$can_categories = AclCategory::where("user_id",Auth::user()->id)->pluck("file_category_id")->ToArray();
-		$can_files = FileCategoryRelation::whereIn("file_category_id",$can_categories)->pluck("file_id")->ToArray();
-		$no_category = $this::whereNotIn("id", FileCategoryRelation::pluck("file_id")->ToArray()  )->pluck("id")->ToArray();
-		return $query->whereIn("id",$can_files)->orWhereIn("id",$no_category);
+		$user_type = str_replace( "\\", "\\\\", Auth::user()->getMorphClass());
+		$user_id = Auth::user()->id;
+		return $query->Where("private",0)->orWhereRaw("(private=1 and user_type='{$user_type}' and user_id='{$user_id}')");
+	}
+
+	public function scopePrivate($query)
+    {
+		$user_type = str_replace( "\\", "\\\\", Auth::user()->getMorphClass());
+		$user_id = Auth::user()->id;
+		return $query->Where("private",1)->where("user_type",$user_type)->where("user_id",$user_id);
+	}
+
+	public function scopePublic($query)
+    {
+		$user_type = str_replace( "\\", "\\\\", Auth::user()->getMorphClass());
+		$user_id = Auth::user()->id;
+		return $query->Where("private",0)->where("user_type",null)->where("user_id",null);
 	}
 
 	public function getThumbnailAttribute()
@@ -81,5 +97,17 @@ class File extends Model
 			}
 		}
 		return false;
+	}
+
+	public function setPrivate()
+	{
+		$user_type = Auth::user()->getMorphClass();
+		$user_id = Auth::user()->id;
+		return $this->update(["user_type"=>$user_type,"user_id"=>$user_id,"private"=>1]);
+	}
+
+	public function setPublic()
+	{
+		return $this->update(["user_type"=>null,"user_id"=>null,"private"=>0]);
 	}
 }
