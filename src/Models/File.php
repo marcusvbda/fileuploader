@@ -55,13 +55,13 @@ class File extends Model
 
 	public function getThumbnailAttribute()
     {
-		$url = config('uploader.image_server')."thumbnail/".$this->slug.".".$this->extension;
+		$url = url('/')."/thumbnail/".$this->slug.".".$this->extension;
 		return $this->attributes['thumbnail'] = $url;
 	}
 	
 	public function getUrlAttribute()
     {
-        $url = config('uploader.image_server').$this->slug.".".$this->extension;
+        $url = url('/')."/".$this->slug.".".$this->extension;
 		return $this->attributes['url'] = $url;
 	}
     
