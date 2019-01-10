@@ -1,113 +1,102 @@
 <?php
-namespace marcusvbda\uploader\Models;
 
-use Eloquent;
+namespace marcusvbda\uploader\Controllers;
 
-
-use Illuminate\Database\Eloquent\Model;
-use Cviebrock\EloquentSluggable\{Sluggable,SluggableScopeHelpers};
-use marcusvbda\uploader\Models\FileRelation;
+use App\Http\Controllers\Controller;
+use File;
+use marcusvbda\uploader\Models\File as _Files;
 use Illuminate\Support\Facades\Storage;
-use marcusvbda\uploader\Models\{FileCategory,AclCategory,FileCategoryRelation};
-use Auth;
+use Cviebrock\EloquentSluggable\Services\SlugService;
+use Intervention\Image\Facades\Image as Image;
 
-class File extends Model
+class UploaderController extends Controller
 {
-	use Sluggable,SluggableScopeHelpers;
-	
-	protected $table = '_files';
-	protected $appends = ['url','thumbnail'];
-
-	protected $fillable = [
-		'id',
-		'name',
-		'dir',
-		'description',
-		'extension',
-		'size',
-		'type',
-		'slug',
-		'user_type',
-		'user_id',
-		'private'
-	];
-
-	public function scopeVisible($query)
+    public function getFile($slug)
     {
-		$user_type = str_replace( "\\", "\\\\", Auth::user()->getMorphClass());
-		$user_id = Auth::user()->id;
-		return $query->Where("private",0)->orWhereRaw("(private=1 and user_type='{$user_type}' and user_id='{$user_id}')");
-	}
+        if ($file = _Files::findBySlug($slug)) {
+            if (Storage::disk('local')->has($file->dir)) {
+                $path = storage_path('app/'.$file->dir);
+                $response = response()->make(File::get($path));
+                $response->header('content-type', File::mimeType($path));
 
-	public function scopePrivate($query)
+                return $response;
+            }
+        }
+    }
+
+    public function getThumbFile($slug)
     {
-		$user_type = str_replace( "\\", "\\\\", Auth::user()->getMorphClass());
-		$user_id = Auth::user()->id;
-		return $query->Where("private",1)->where("user_type",$user_type)->where("user_id",$user_id);
-	}
+        if ($file = _Files::findBySlug($slug)) {
+            $dir = config('uploader.thumbnail_path').'/'.$file->id.'.'.$file->extension;
+            if (Storage::disk('local')->has($dir)) {
+                $path = storage_path('app/'.$dir);
+                $response = response()->make(File::get($path));
+                $response->header('content-type', File::mimeType($path));
 
-	public function scopePublic($query)
+                return $response;
+            } else {
+                if (file_exists($path = dirname(__FILE__).'/../images/'.$file->type.'.png')) {
+                    $response = response()->make(File::get($path));
+                    $response->header('content-type', File::mimeType($path));
+
+                    return $response;
+                }
+            }
+        }
+    }
+
+    public static function makeThumbnail($file)
     {
-		$user_type = str_replace( "\\", "\\\\", Auth::user()->getMorphClass());
-		$user_id = Auth::user()->id;
-		return $query->Where("private",0)->where("user_type",null)->where("user_id",null);
-	}
+        $path = storage_path('app/'.$file->dir);
+        $thumbnailDir = config('uploader.thumbnail_path').'/'.$file->id.'.'.$file->extension;
+        $thumb = Image::make($path);
+        $thumb = $thumb->resize(null, (int) config('uploader.thumbnail_height'), function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        })->encode($file->extension, config('uploader.thumbnail_quality'));
+        $thumbnail = Storage::put($thumbnailDir, $thumb);
 
-	public function getThumbnailAttribute()
+        return $thumbnail;
+    }
+
+    public static function upload($file, $name, $description)
     {
-		$url = url('/')."/thumbnail/".$this->slug.".".$this->extension;
-		return $this->attributes['thumbnail'] = $url;
-	}
-	
-	public function getUrlAttribute()
-    {
-        $url = url('/')."/".$this->slug.".".$this->extension;
-		return $this->attributes['url'] = $url;
-	}
-    
-    public function sluggable(){
-		return
-		[
-			'slug' =>
-			[
-				'source' => 'name'
-			]
-		];
-	}
+        try {
+            $path = config('uploader.upload_path');
+            if (is_string($file)) {
+                $url = $file;
+                $extension = pathinfo($url, PATHINFO_EXTENSION);
+                $filename = pathinfo($url, PATHINFO_FILENAME);
+                $filename = pathinfo($url, PATHINFO_FILENAME);
+                $type = pathinfo($url, FILEINFO_MIME_TYPE);
+                $slugname = SlugService::createSlug(_Files::class, 'slug', $name);
+                $data = file_get_contents($url);
+                $dir = $path.'/'.$slugname.'.'.$extension;
+                $buffer = file_get_contents($url);
+                $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                $type = $finfo->buffer($buffer);
+                Storage::put($dir, $data);
+            } else {
+                $extension = $file->getClientOriginalExtension();
+                $slugname = SlugService::createSlug(_Files::class, 'slug', $name);
+                $dir = $file->storeAs($path, $slugname.'.'.$extension);
+                $type = substr($file->getMimeType(), 0, 5);
+            }
+            $type = explode('/', $type)[0];
+            $newFile = [
+                'name' => $name,
+                'dir' => $dir,
+                'description' => $description,
+                'slug' => $slugname,
+                'extension' => $extension,
+                'type' => $type,
+            ];
 
-	public function categories()
-	{
-		return $this->belongsToMany(FileCategory::class, '_files_categories_relation','file_id','file_category_id');
-	}
+            return _Files::create($newFile);
+        } catch (\Exception $e) {
+            Storage::delete($dir);
 
-	public function delete()
-	{
-		if(config('uploader.cascadeFile'))
-		{
-			FileRelation::where("file_id",$this->id)->delete();
-			Storage::delete($this->dir);
-			return parent::delete();
-		}
-		else
-		{
-			if( FileRelation::where("file_id",$this->id)->count()==0  )
-			{
-				Storage::delete($this->dir);
-				return parent::delete();	
-			}
-		}
-		return false;
-	}
-
-	public function setPrivate()
-	{
-		$user_type = Auth::user()->getMorphClass();
-		$user_id = Auth::user()->id;
-		return $this->update(["user_type"=>$user_type,"user_id"=>$user_id,"private"=>1]);
-	}
-
-	public function setPublic()
-	{
-		return $this->update(["user_type"=>null,"user_id"=>null,"private"=>0]);
-	}
+            return null;
+        }
+    }
 }
