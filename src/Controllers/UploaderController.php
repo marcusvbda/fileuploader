@@ -58,13 +58,12 @@ class UploaderController extends Controller
     {
         $path = storage_path("app/".$file->dir);
         $thumbnailDir = config('uploader.thumbnail_path')."/".$file->id.".".$file->extension;
-        $thumb = Image::make( $path );
-        $thumb = $thumb->resize(null,(int)config('uploader.thumbnail_height'), function ($constraint) 
-        {
+        $thumbnailPath = config('uploader.thumbnail_path');
+        
+        Image::make($path)->resize(null, (int) (int)config('uploader.thumbnail_height'), function ($constraint) {
             $constraint->aspectRatio();
             $constraint->upsize();
-        })->encode($file->extension, config('uploader.thumbnail_quality'));
-        $thumbnail =  Storage::put($thumbnailDir, $thumb);
+        })->save($thumbnailDir, config('uploader.thumbnail_quality'));
         
         return $thumbnail;
     }
